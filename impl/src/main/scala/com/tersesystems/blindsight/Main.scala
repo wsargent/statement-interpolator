@@ -18,12 +18,14 @@ object Main extends App {
     Argument("<insert food here>")
   }
 
-
   val pizza = Pizza("sweetcorn")
   val burrito = Burrito("chicken")
   val anything = "anything"
 
-  println(st"I like food")
+  (st"I like a thing ${burrito}")
+
+  println(st"") // nothing at all
+  println(st"I like food") // constant
   println(st"I like ${pizza}")
   println(st"I like ${burrito}")
   println(st"I like both ${pizza} and ${burrito}")
@@ -31,7 +33,7 @@ object Main extends App {
   println(st"I like ${burrito: Food} which is a food") // require the food type
 
   val ex = new IllegalStateException("illegal state")
-  println(st"this is an ${ex}") // exception should be handled specially.
+  //println(st"this is an ${ex}") // exception should be handled specially.
 
 }
 

@@ -1,7 +1,5 @@
 package com.tersesystems
 
-import scala.StringContext.InvalidEscapeException
-
 package object blindsight {
 
   //https://stackoverflow.com/a/23509652
@@ -18,21 +16,20 @@ package object blindsight {
 
       if (args.nonEmpty) {
         c.prefix.tree match {
-          case Apply(head, List(Apply(_, partz))) =>
+          case Apply(_, List(Apply(_, partz))) =>
             val res: Seq[c.Expr[Argument]] = args.map { t =>
               val nextElement = t.tree
               val tag = c.WeakTypeTag(nextElement.tpe)
 
-              //val field = q"""com.tersesystems.blindsight.Argument[${tag.tpe}].apply($nextElement).toArgument($nextElement)"""
+              // We want to handle throwable as well...
+              //if (tag.tpe <:< typeOf[Throwable]) q"(null: String)" else tree
+
               val field = q"""implicitly[com.tersesystems.blindsight.ToArgument[${tag.tpe}]].toArgument($nextElement)"""
               c.Expr[Argument](field)
             }
 
-            //println("code: " + showCode(head))
-
             val parts = partz.map {
               case Literal(Constant(const: String)) => const
-              case other => other.toString()
             }.mkString("{}")
             c.Expr(q"com.tersesystems.blindsight.Statement(${parts}, ..$res)")
           case _ =>
