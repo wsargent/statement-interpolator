@@ -33,7 +33,7 @@ object Main extends App {
   println(st"I like ${burrito: Food} which is a food") // require the food type
 
   val ex = new IllegalStateException("illegal state")
-  //println(st"this is an ${ex}") // exception should be handled specially.
+  println(st"this is an ${ex}") // exception should be handled specially.
 
 }
 

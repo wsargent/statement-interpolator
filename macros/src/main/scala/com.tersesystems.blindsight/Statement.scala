@@ -19,6 +19,7 @@ package com.tersesystems.blindsight
 final case class Statement private (
   message: String,
   arguments: Arguments,
+  throwable: Option[Throwable]
 ) {
 
   def withArguments(args: Arguments): Statement = {
@@ -27,11 +28,15 @@ final case class Statement private (
 }
 
 object Statement {
-  def apply(): Statement = Statement("", Arguments.empty)
+  def apply(): Statement = new Statement("", Arguments.empty, None)
 
-  def apply(s: String): Statement = Statement(s, Arguments.empty)
+  def apply(s: String): Statement = new Statement(s, Arguments.empty, None)
 
-  def apply(s: String, varargs: Argument*): Statement = apply(s, new Arguments(varargs))
+  def apply(s: String, varargs: Argument*): Statement = new Statement(s, new Arguments(varargs), None)
 
-  def apply(s: String, arguments: Arguments): Statement = new Statement(s, arguments)
+  def apply(s: String, arguments: Arguments): Statement = new Statement(s, arguments, None)
+
+  def apply(s: String, t: Throwable): Statement = new Statement(s, Arguments.empty, throwable = Some(t))
+
+  def apply(s: String, arguments: Arguments, t: Throwable): Statement = new Statement(s, arguments, throwable = Some(t))
 }

@@ -17,21 +17,23 @@ package object blindsight {
       if (args.nonEmpty) {
         c.prefix.tree match {
           case Apply(_, List(Apply(_, partz))) =>
-            val res: Seq[c.Expr[Argument]] = args.map { t =>
-              val nextElement = t.tree
-              val tag = c.WeakTypeTag(nextElement.tpe)
 
-              // We want to handle throwable as well...
-              //if (tag.tpe <:< typeOf[Throwable]) q"(null: String)" else tree
-
-              val field = q"""implicitly[com.tersesystems.blindsight.ToArgument[${tag.tpe}]].toArgument($nextElement)"""
-              c.Expr[Argument](field)
+            // Filter into throwables and arguments
+            val (t, a) = args.partition(t => c.WeakTypeTag(t.tree.tpe).tpe <:< typeOf[Throwable])
+            val arguments: Seq[c.Expr[Argument]] = a.map { t =>
+                val nextElement = t.tree
+                val tag = c.WeakTypeTag(nextElement.tpe)
+                val field = q"""implicitly[com.tersesystems.blindsight.ToArgument[${tag.tpe}]].toArgument($nextElement)"""
+                c.Expr[Argument](field)
             }
 
-            val parts = partz.map {
-              case Literal(Constant(const: String)) => const
-            }.mkString("{}")
-            c.Expr(q"com.tersesystems.blindsight.Statement(${parts}, ..$res)")
+            val format = partz.map { case Literal(Constant(const: String)) => const }.mkString("{}")
+            if (t.isEmpty) {
+              c.Expr(q"com.tersesystems.blindsight.Statement($format, ..$arguments)")
+            } else {
+              val throwable = t.head
+              c.Expr(q"com.tersesystems.blindsight.Statement($format, ..$arguments, $throwable)")
+            }
           case _ =>
             c.abort(c.prefix.tree.pos, "The pattern can't be used with the interpolation.")
         }
