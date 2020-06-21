@@ -1,7 +1,5 @@
 package com.tersesystems.blindsight
 
-import java.time.Instant
-
 object Main extends App {
   sealed trait Food
 
@@ -16,16 +14,24 @@ object Main extends App {
     Argument("burrito with " + burrito.filling + " fillings")
   }
 
+  implicit val foodToArgument: ToArgument[Food] = ToArgument[Food] { food =>
+    Argument("<insert food here>")
+  }
+
+
   val pizza = Pizza("sweetcorn")
   val burrito = Burrito("chicken")
   val anything = "anything"
-  val instant = Instant.now
 
   println(st"I like food")
   println(st"I like ${pizza}")
   println(st"I like ${burrito}")
   println(st"I like both ${pizza} and ${burrito}")
   println(st"I like ${anything}")
-  //println(st"I like ${instant} coffee") // should not compile
+  println(st"I like ${burrito: Food} which is a food") // require the food type
+
+  val ex = new IllegalStateException("illegal state")
+  println(st"this is an ${ex}") // exception should be handled specially.
+
 }
 
